@@ -152,7 +152,7 @@ th:first-child,td:first-child{text-align:left}
 .lv-good.lv{background:var(--ok-fg)} .lv-warn.lv{background:#C9962A} .lv-alert.lv{background:var(--warn-fg)}
 .kpi strong.bad{color:var(--warn-fg)} .kpi strong.ok{color:var(--ok-fg)}
 .legend .unit{margin-left:auto}
-.legend i.goal{height:0;border-top:1.5px dashed var(--good);background:none}
+.legend i.goal{height:0;border-top:1.5px dashed var(--card-muted);background:none}
 body{word-break:keep-all;overflow-wrap:anywhere}
 .steps h4{font-size:17px}
 svg.plot text{font-size:11.5px}
@@ -221,6 +221,11 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .label,:root:not([data-theme="light"]) .eyebrow{color:var(--c3)}}
 .steps li{background:var(--surface)}
 .steps b{color:var(--c2)}
+
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px;cursor:pointer}
+.chk input{width:16px;height:16px;margin:0;accent-color:var(--c1)}
+.chk-note{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--pop-muted)}
+.chk-note::before{content:"⚠ "}
 </style>
 
 </head>
@@ -237,6 +242,8 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
         <div class="row"><label class="sw" id="sw1"><input type="color" id="in1" aria-label="주조색"></label><span>주조색</span><code id="hx1"></code></div>
         <div class="row"><label class="sw" id="sw2"><input type="color" id="in2" aria-label="보조색"></label><span>보조색</span><code id="hx2"></code></div>
         <div class="row"><label class="sw" id="sw3"><input type="color" id="in3" aria-label="포인트색"></label><span>포인트색</span><code id="hx3"></code></div>
+        <label class="chk"><input type="checkbox" id="chartOwn"> 차트 선도 이 색으로</label>
+        <p class="chk-note" id="chartWarn" hidden></p>
         <button class="reset" id="reset" type="button">기본값으로</button>
       </div>
     </div>
@@ -278,16 +285,16 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
 <script>
 (function(){
   var PRESETS=[
-    {name:'차콜',c:['#2E2E30','#6E6A64','#D8BE8A']},
-    {name:'네이비',c:['#1B2A4A','#4A6490','#F2C230']},
-    {name:'포레스트',c:['#1E3B2F','#5C7D68','#E0B866']},
-    {name:'버건디',c:['#4A1D26','#8E5C62','#E7AF84']},
-    {name:'올리브',c:['#5E5120','#948656','#EAD9A0']}
+    {name:'차콜',c:['#2E2E30','#6E6A64','#D8BE8A'],chart:['#0B5E8A','#C2562A','#9A6BC4']},
+    {name:'네이비',c:['#1B2A4A','#4A6490','#F2C230'],chart:['#1D4FA8','#D0762A','#1FA39A']},
+    {name:'포레스트',c:['#1E3B2F','#5C7D68','#E0B866'],chart:['#2E7D4F','#8F4A9E','#B47F18']},
+    {name:'버건디',c:['#4A1D26','#8E5C62','#E7AF84'],chart:['#A63A50','#3E6FB0','#B7862E']},
+    {name:'올리브',c:['#5E5120','#948656','#EAD9A0'],chart:['#5E6E14','#A8456E','#3E86C9']}
   ];
   var CUSTOM_DEFAULT=['#1B2A4A','#4A6490','#F2C230'];
   var KEY='srcrev-theme-v1';
   var st={pal:0,custom:CUSTOM_DEFAULT.slice(),mode:null};
-  try{var sv=JSON.parse(localStorage.getItem(KEY)||'null');if(sv){st.pal=sv.pal;st.custom=sv.custom||st.custom;st.mode=sv.mode||null;}}catch(e){}
+  try{var sv=JSON.parse(localStorage.getItem(KEY)||'null');if(sv){st.pal=sv.pal;st.custom=sv.custom||st.custom;st.mode=sv.mode||null;st.chartOwn=!!sv.chartOwn;}}catch(e){}
   function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
   var root=document.documentElement, mq=window.matchMedia('(prefers-color-scheme: dark)');
   function cols(){return st.pal==='custom'?st.custom:PRESETS[st.pal]?PRESETS[st.pal].c:PRESETS[0].c;}
@@ -311,8 +318,9 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
     var inp=document.getElementById('in'+n);
     inp.addEventListener('input',function(){st.custom[n-1]=inp.value.toUpperCase();st.pal='custom';apply();save();});
   });
-  document.getElementById('reset').onclick=function(){st.custom=CUSTOM_DEFAULT.slice();apply();save();};
+  document.getElementById('reset').onclick=function(){st.custom=CUSTOM_DEFAULT.slice();st.chartOwn=false;apply();save();};
 
+  document.getElementById('chartOwn').addEventListener('change',function(e){st.chartOwn=e.target.checked;st.pal='custom';apply();save();});
   modeBtn.onclick=function(){st.mode=isDark()?'light':'dark';apply();save();};
   mq.addEventListener&&mq.addEventListener('change',function(){if(!st.mode)apply();});
 
@@ -320,9 +328,19 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
   var SUN='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v1.8M8 13.2V15M1 8h1.8M13.2 8H15M3 3l1.3 1.3M11.7 11.7 13 13M3 13l1.3-1.3M11.7 4.3 13 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
 
   function onc(h){var r=parseInt(h.substr(1,2),16),g=parseInt(h.substr(3,2),16),b=parseInt(h.substr(5,2),16);return (0.2126*r+0.7152*g+0.0722*b)/255>0.62?'#15161A':'#FFFFFF';}
+  function lab(h){var c=[1,3,5].map(function(i){var v=parseInt(h.substr(i,2),16)/255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+    var l=Math.cbrt(0.4122214708*c[0]+0.5363325363*c[1]+0.0514459929*c[2]),m=Math.cbrt(0.2119034982*c[0]+0.6806995451*c[1]+0.1073969566*c[2]),s=Math.cbrt(0.0883024619*c[0]+0.2817188376*c[1]+0.6299787005*c[2]);
+    return [0.2104542553*l+0.7936177850*m-0.0040720468*s,1.9779984951*l-2.4285922050*m+0.4505937099*s,0.0259040371*l+0.7827717662*m-0.8086757660*s];}
+  function minDE(a){var p=a.map(lab),m=1e9;for(var i=0;i<a.length;i++)for(var j=i+1;j<a.length;j++){var d=Math.hypot(p[i][0]-p[j][0],p[i][1]-p[j][1],p[i][2]-p[j][2])*100;if(d<m)m=d;}return m;}
+  function contrastW(h){var c=[1,3,5].map(function(i){var v=parseInt(h.substr(i,2),16)/255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);});var L=0.2126*c[0]+0.7152*c[1]+0.0722*c[2];return 1.05/(L+0.05);}
   function apply(){
     var c=cols();
     root.style.setProperty('--c1',c[0]);root.style.setProperty('--c2',c[1]);root.style.setProperty('--c3',c[2]);root.style.setProperty('--on-c1',onc(c[0]));root.style.setProperty('--on-c2',onc(c[1]));
+    var own=[st.custom[0],st.custom[2],st.custom[1]];
+    var ch=st.pal==='custom'?(st.chartOwn?own:PRESETS[0].chart):(PRESETS[st.pal]||PRESETS[0]).chart;
+    root.style.setProperty('--s-center',ch[0]);root.style.setProperty('--s-store',ch[1]);root.style.setProperty('--s-sales',ch[2]);
+    var co=document.getElementById('chartOwn'),wn=document.getElementById('chartWarn');
+    if(co){co.checked=!!st.chartOwn;var msg=[];if(st.chartOwn){if(minDE(own)<15)msg.push('비슷한 색이 있어 차트 선을 구분하기 어려울 수 있습니다.');if(own.some(function(h){return contrastW(h)<2.5;}))msg.push('밝은 색 선은 흰 바탕에서 잘 보이지 않을 수 있습니다.');}wn.textContent=msg.join(' ');wn.hidden=!msg.length;}
     if(st.mode)root.setAttribute('data-theme',st.mode);else root.removeAttribute('data-theme');
     var d=isDark();
     modeBtn.innerHTML=(d?SUN:MOON)+'<span>'+(d?'라이트':'다크')+'</span>';
@@ -409,7 +427,7 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
     for(i=0;i<N;i+=4)h+='<text x="'+X(i)+'" y="'+(H-10)+'" text-anchor="middle">'+i+'주</text>';
     h+='<line x1="'+X(T0+EXPECT)+'" x2="'+X(T0+EXPECT)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--card-muted)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>';
     h+='<text x="'+(X(T0+EXPECT)+5)+'" y="'+(H-B-6)+'" class="t-exp">예상 소진</text>';
-    h+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(80)+'" y2="'+Y(80)+'" stroke="var(--good)" stroke-width="1.2" stroke-dasharray="6 4"/>';
+    h+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(80)+'" y2="'+Y(80)+'" stroke="var(--card-fg)" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="6 4"/>';
     h+='<g clip-path="url(#reveal)">';
     var cy=c.center.map(Y);
     h+='<path d="'+smooth(xs,cy)+'L'+X(N-1)+','+Y(0)+'L'+X(0)+','+Y(0)+'Z" fill="url(#gC)"/>';
