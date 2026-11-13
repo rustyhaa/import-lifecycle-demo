@@ -226,6 +226,22 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
 .chk input{width:16px;height:16px;margin:0;accent-color:var(--c1)}
 .chk-note{margin:6px 0 0;font-size:12px;line-height:1.5;color:var(--pop-muted)}
 .chk-note::before{content:"⚠ "}
+
+/* 한 화면에 들어오게 */
+.wrap{padding-block:14px 20px}
+.top{margin-bottom:16px;padding-block:10px}
+.intro h1{font-size:clamp(24px,2.8vw,32px);margin:0;letter-spacing:-.5px}
+.intro p{max-width:none;margin:4px 0 0;font-size:14px;line-height:1.55}
+.solo{margin-top:16px}
+.case{padding:16px 20px;gap:12px}
+.case-h h2{font-size:14px}
+.pick{padding:7px 10px}
+.kpi{padding:9px 14px}
+.kpi strong{font-size:20px;margin-top:0}
+.chart{padding:10px 12px 2px}
+.legend{margin-bottom:0}
+details summary{padding:0}
+.note{padding:9px 14px;font-size:13.5px}
 </style>
 
 </head>
@@ -251,7 +267,7 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
 
   <section class="intro">
     <h1>수입상품 생애 추적</h1>
-    <p>발주 전 검토에서 정한 수량이 물류센터와 매장에서 어떻게 쌓이고 팔리는지 주 단위로 보여 주는 화면입니다. 사례를 골라 보세요. 모든 수치는 가상 데이터입니다.</p>
+    <p>발주 전 검토에서 정한 수량이 물류센터와 매장에서 어떻게 쌓이고 팔리는지 주 단위로 보여 줍니다. 모든 수치는 가상 데이터입니다.</p>
   </section>
 
   <div class="solo">
@@ -270,7 +286,7 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
           <span><i class="goal"></i>목표 80% 판매</span>
           <span class="unit">계획 수량 대비 %</span>
         </div>
-        <svg class="plot" id="plot" viewBox="0 0 600 300" role="img" tabindex="0" aria-label=""></svg>
+        <svg class="plot" id="plot" viewBox="0 0 600 236" role="img" tabindex="0" aria-label=""></svg>
         <div class="tip" id="tip" hidden></div>
       </div>
       <details>
@@ -393,7 +409,7 @@ svg.plot .t-end tspan{fill:var(--card-muted);font-weight:500;font-family:var(--f
     picker.appendChild(b);
   });
 
-  var W=600,H=300,L=44,R=86,T=26,B=32,N=29,YMAX=120;
+  var W=600,H=236,L=44,R=86,T=24,B=28,N=29,YMAX=120;
   var X=function(i){return L+(W-L-R)*i/(N-1);}, Y=function(v){return T+(H-T-B)*(1-v/YMAX);};
   var S=[{k:'center',name:'물류센터 재고',end:'센터 재고',col:'var(--s-center)',w:2.5},
          {k:'store',name:'매장 재고',end:'매장 재고',col:'var(--s-store)',w:2.5},
