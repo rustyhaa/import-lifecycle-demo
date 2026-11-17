@@ -250,6 +250,7 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
 
 </head>
 <body>
+<script src="lifebar.js" data-site="import"></script>
 <div class="wrap">
   <header class="top">
     <div class="brand"><i></i>사전품의 추적<small>직수입 소싱상품 · 품의부터 소진까지</small></div>
@@ -528,6 +529,7 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
   function select(id){
     sel=id; CUR=R.filter(function(r){return r.id===id;})[0];
     try{history.replaceState(null,'','#'+id);}catch(e){}
+    try{window.dispatchEvent(new Event('lifebar:sel'));}catch(e){}
     renderList(); renderDetail(CUR);
   }
   function renderDetail(r){
@@ -538,7 +540,7 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
     else meta+=' · 첫 센터 입고 '+fmtD(r.W[r.t0].t)+' (품의 후 '+r.t0+'주) · '+r.wk+'주차 '+r.status;
     document.getElementById('meta').textContent=meta;
     var lt=document.getElementById('lt');if(!lt){lt=document.createElement('div');lt.id='lt';lt.style.cssText='font-size:12.5px;margin:4px 0 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center';document.getElementById('meta').after(lt);}
-    lt.innerHTML=r.lifeType?'<span style="font-weight:600">판매 수명 유형 '+r.lifeType+'</span>'+(r.onePage?'<a href="'+r.onePage+'" target="_blank" rel="noopener" style="font-weight:600">상품 한 장에서 전체 이력 보기 →</a>':''):'';
+    lt.innerHTML=r.lifeType?'<span style="font-weight:600">판매 수명 유형 '+r.lifeType+'</span>'+(r.onePage?'<a href="'+r.onePage+'" style="font-weight:600">상품 한 장에서 전체 이력 보기 →</a>':''):'';
     var cls=function(bad,ok){return bad?' class="bad"':ok?' class="ok"':'';};
     var kp='<div><small>합의 수량</small><b>'+n0(A)+'</b><span>'+(r.prop>A?'원안 '+n0(r.prop)+'에서 '+n0(r.prop-A)+' 줄임':'원안 그대로')+'</span></div>';
     if(r.t0<0){
