@@ -9,4 +9,4 @@
 
 
 ## 공용 가상 상품 (판매 수명 유형 6가지)
-품의 8건은 판매 수명 유형 6가지(① 정점이 초반·이후 하락, ② 완만 상승·유지, ③ 계절성, ④ 하락 후 재상승, ⑤ 실적이 짧은 신상품, ⑥ 행사 급등)마다 1~2개씩 만든 가상 상품입니다. [상품 한 장](https://rustyhaa.github.io/product-lifecycle-demo/)·[처분 화면](https://disp-lifecycle-site.vercel.app/)과 같은 상품이며, 데이터는 `products.js`에 있습니다. 일반 사용자 화면(`user.html`)의 사례 4개는 따로 둔 예시입니다.
+품의 8건은 판매 수명 유형 6가지(① 정점이 초반·이후 하락, ② 완만 상승·유지, ③ 계절성, ④ 하락 후 재상승, ⑤ 실적이 짧은 신상품, ⑥ 행사 급등)마다 1~2개씩 만든 가상 상품입니다. [상품 한 장](https://rustyhaa.github.io/product-lifecycle-demo/)·[처분 화면](https://rustyhaa.github.io/disp-lifecycle-site/)과 같은 상품이며, 데이터는 `products.js`에 있습니다. 일반 사용자 화면(`user.html`)의 사례 4개는 따로 둔 예시입니다.
