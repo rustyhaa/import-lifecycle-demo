@@ -338,6 +338,7 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
+<script src="products.js"></script>
 <script>
 (function(){
   var PRESETS=[
@@ -408,20 +409,10 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
   apply();
 
 
-  /* ───── 가상 품의 10건 ───── */
-  var DATA_WEEK='2026-11-02';
-  var R=[
-    {id:'SR-2604-03',vol:[1.1,12],name:'수입 올리브유 1L',cat:'식품',dc:'상온 센터',type:'신규',date:'2026-04-20',prop:100000,agreed:60000,expect:13,cost:8500,inflow:{3:.60,5:.45,10:.25,16:.22},peak:.02,ramp:8,decay:0,storeT:.18,cap:.09},
-    {id:'SR-2605-01',vol:[3.0,12],name:'수입 감자칩 대용량',cat:'식품',dc:'상온 센터',type:'신규',date:'2026-05-04',prop:40000,agreed:40000,expect:13,cost:2900,inflow:{2:1,15:.45},peak:.09,ramp:4,decay:.03,storeT:.22,cap:.3},
-    {id:'SR-2603-02',vol:[1.5,20],name:'수입 린넨 셔츠',cat:'비식품',dc:'패션 센터',type:'신규',date:'2026-03-02',prop:30000,agreed:25000,expect:12,cost:11000,inflow:{3:1},peak:.035,ramp:2,decay:.04,storeT:1,cap:.45},
-    {id:'SR-2604-07',vol:[8.0,4],name:'수입 스테인리스 냄비',cat:'비식품',dc:'비식품 센터',type:'신규',date:'2026-04-13',prop:18000,agreed:18000,expect:16,cost:19000,inflow:{3:.7,5:.5},peak:.012,ramp:6,decay:.01,storeT:.08,cap:.06},
-    {id:'SR-2607-02',vol:[0.8,12],name:'수입 토마토 파스타소스',cat:'식품',dc:'상온 센터',type:'리오더',date:'2026-07-06',prop:45000,agreed:30000,expect:13,cost:3600,inflow:{2:.6,6:.4},peak:.06,ramp:3,decay:0,storeT:.2,cap:.2},
-    {id:'SR-2608-04',vol:[1.6,12],name:'수입 그래놀라',cat:'식품',dc:'상온 센터',type:'신규',date:'2026-08-10',prop:30000,agreed:22000,expect:13,cost:5200,inflow:{3:1,6:.3},peak:.045,ramp:4,decay:0,storeT:.2,cap:.2},
-    {id:'SR-2610-01',vol:[0.6,24],name:'수입 커피캡슐',cat:'식품',dc:'상온 센터',type:'리오더',date:'2026-10-12',prop:50000,agreed:50000,expect:10,cost:4400,arrival:'2026-11-16',inflow:{5:1},peak:.08,ramp:2,decay:0,storeT:.2,cap:.25},
-    {id:'SR-2602-05',vol:[0.6,24],name:'수입 탄산수 500ml',cat:'식품',dc:'상온 센터',type:'리오더',date:'2026-02-09',prop:100000,agreed:80000,expect:12,cost:900,inflow:{2:.5,6:.5,14:.3},peak:.07,ramp:2,decay:0,storeT:.2,cap:.25},
-    {id:'SR-2606-03',vol:[0.5,12],name:'수입 그린올리브 절임',cat:'식품',dc:'상온 센터',type:'신규',date:'2026-06-08',prop:15000,agreed:15000,expect:16,cost:4100,inflow:{3:1},peak:.04,ramp:5,decay:.01,storeT:.25,cap:.15},
-    {id:'SR-2610-03',vol:[1.1,12],name:'수입 코코넛워터',cat:'식품',dc:'상온 센터',type:'신규',date:'2026-10-26',prop:40000,agreed:35000,expect:13,cost:2300,arrival:'2026-11-23',inflow:{4:1},peak:.06,ramp:3,decay:0,storeT:.2,cap:.2}
-  ];
+  /* ───── 가상 품의 8건: 판매 수명 유형 6가지 공용 가상 데이터(products.js) ───── */
+  var SR=window.SR_DATA||{dataWeek:'2026-11-02',items:[]};
+  var DATA_WEEK=SR.dataWeek;
+  var R=SR.items;
   var BASE={'식품':{p25:.45,med:.68,p75:.86},'비식품':{p25:.30,med:.55,p75:.78}};
   var DAY=864e5;
   function d(s){return new Date(s+'T00:00:00Z');}
@@ -433,7 +424,8 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
   R.forEach(function(r){
     var n=Math.round((d(DATA_WEEK)-d(r.date))/(7*DAY))+1, A=r.agreed;
     var c=0,s=0,q=0,t0=-1,W=[];
-    for(var k=0;k<n;k++){
+    if(r.W0){W=r.W0;n=W.length;for(var k0=0;k0<n;k0++)if(W[k0].inn>0){t0=k0;break;}}
+    else for(var k=0;k<n;k++){
       var inn=(r.inflow[k]||0)*A; if(inn>0&&t0<0)t0=k; c+=inn;
       var ship=0,sale=0;
       if(t0>=0){
@@ -545,6 +537,8 @@ th{color:var(--card-muted);font-weight:500;position:sticky;top:0;background:var(
     if(r.t0<0)meta+=' · 예상 입고 '+(r.arrival||'미정')+' · 아직 센터 입고 없음';
     else meta+=' · 첫 센터 입고 '+fmtD(r.W[r.t0].t)+' (품의 후 '+r.t0+'주) · '+r.wk+'주차 '+r.status;
     document.getElementById('meta').textContent=meta;
+    var lt=document.getElementById('lt');if(!lt){lt=document.createElement('div');lt.id='lt';lt.style.cssText='font-size:12.5px;margin:4px 0 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center';document.getElementById('meta').after(lt);}
+    lt.innerHTML=r.lifeType?'<span style="font-weight:600">판매 수명 유형 '+r.lifeType+'</span>'+(r.onePage?'<a href="'+r.onePage+'" target="_blank" rel="noopener" style="font-weight:600">상품 한 장에서 전체 이력 보기 →</a>':''):'';
     var cls=function(bad,ok){return bad?' class="bad"':ok?' class="ok"':'';};
     var kp='<div><small>합의 수량</small><b>'+n0(A)+'</b><span>'+(r.prop>A?'원안 '+n0(r.prop)+'에서 '+n0(r.prop-A)+' 줄임':'원안 그대로')+'</span></div>';
     if(r.t0<0){
